@@ -6,10 +6,11 @@ import AppKit
 /// before. Documents the user already had open are exported but left open; documents
 /// mkpdf opened are closed without saving.
 ///
-/// Office is sandboxed and asks the user for every folder it writes to, so it saves into
-/// the Office group container, which all Office apps may write to, and mkpdf moves the PDF
-/// next to the source. Reading that container needs the "access data from other apps"
-/// permission for the app running mkpdf; macOS asks once.
+/// Office is sandboxed: it asks the user for access to every new folder it writes to, but
+/// remembers a folder once granted. So it always saves into one exchange folder, granted
+/// once per app, and mkpdf moves the PDF next to the source. Office's own containers would
+/// need no grant, but reading them needs a macOS permission that is asked on every run for
+/// an app without a Developer ID.
 @MainActor
 public struct OfficeConverter: DocumentConverter {
     private static let readyTimeout: Duration = .seconds(60)
@@ -17,10 +18,11 @@ public struct OfficeConverter: DocumentConverter {
     private static let pollInterval: Duration = .milliseconds(500)
     /// An `open` sent while the app is still starting can be dropped; it is sent again.
     private static let reopenInterval: Duration = .seconds(5)
-    /// Long enough for a big presentation.
+    /// Long enough for a big presentation, or for the user to answer Office's one-time
+    /// access dialog for the exchange folder.
     private static let saveTimeoutSeconds = 600
-    /// Shared by all Office apps (team UBF8T346G9), so their sandbox lets them write here.
-    private static let officeGroupContainer = "Library/Group Containers/UBF8T346G9.Office"
+    /// Fixed: a grant covers only this folder, not its subfolders.
+    private static let exchangeFolder = "Library/Application Support/mkpdf/Office"
 
     private let app: OfficeApp
 
@@ -36,18 +38,13 @@ public struct OfficeConverter: DocumentConverter {
             return jobs.map { _ in .office("\(app.displayName) is not installed") }
         }
         let exchange = FileManager.default.homeDirectoryForCurrentUser
-            .appending(path: Self.officeGroupContainer)
-            .appending(path: "mkpdf/\(UUID().uuidString)", directoryHint: .isDirectory)
+            .appending(path: Self.exchangeFolder, directoryHint: .isDirectory)
         do {
             try FileManager.default.createDirectory(
                 at: exchange, withIntermediateDirectories: true)
         } catch {
-            let reason = describeContainerAccess(error)
+            let reason = error.localizedDescription
             return jobs.map { _ in .office(reason) }
-        }
-        defer {
-            // Office's container is not the user's folder; a leftover there is harmless.
-            try? FileManager.default.removeItem(at: exchange)
         }
         let wasRunning = isRunning
         let alreadyOpen: Set<String>
@@ -108,7 +105,7 @@ public struct OfficeConverter: DocumentConverter {
         do {
             try FileManager.default.moveItem(at: saved, to: job.output)
         } catch {
-            return .office(describeContainerAccess(error))
+            return .fileSystem(error.localizedDescription)
         }
         return nil
     }
@@ -190,16 +187,6 @@ public struct OfficeConverter: DocumentConverter {
         url.path(percentEncoded: false)
     }
 
-    private func describeContainerAccess(_ error: any Error) -> String {
-        guard let error = error as? CocoaError,
-            [.fileReadNoPermission, .fileWriteNoPermission].contains(error.code)
-        else {
-            return error.localizedDescription
-        }
-        return "no access to Office's shared folder: allow \"access data from other apps\" "
-            + "for the app running mkpdf in System Settings → Privacy & Security"
-    }
-
     private func describe(_ error: any Error) -> String {
         guard let failure = error as? AppleScriptRunner.Failure else {
             return error.localizedDescription
@@ -209,7 +196,8 @@ public struct OfficeConverter: DocumentConverter {
             return "not allowed to control \(app.displayName): allow it in System Settings → "
                 + "Privacy & Security → Automation"
         case AppleScriptRunner.Code.userCanceled:
-            return "\(app.displayName): canceled"
+            return "\(app.displayName) was not given access to mkpdf's exchange folder; "
+                + "run again and grant it"
         case AppleScriptRunner.Code.timedOut:
             return "\(app.displayName) did not respond in time; it may be waiting in a dialog, "
                 + "for example for a password"
