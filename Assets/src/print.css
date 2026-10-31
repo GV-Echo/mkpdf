@@ -1,0 +1,122 @@
+:root {
+  --text: #1f2328;
+  --muted: #59636e;
+  --border: #d1d9e0;
+  --code-background: #f6f8fa;
+  --link: #0969da;
+  --body-size: 10.5pt;
+  --code-size: 9pt;
+}
+
+html {
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  font: var(--body-size) / 1.5 -apple-system, "Helvetica Neue", sans-serif;
+  overflow-wrap: break-word;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 1.4em 0 0.5em;
+  line-height: 1.25;
+  break-after: avoid;
+}
+h1 { font-size: 1.9em; padding-bottom: 0.25em; border-bottom: 1px solid var(--border); }
+h2 { font-size: 1.45em; padding-bottom: 0.2em; border-bottom: 1px solid var(--border); }
+h3 { font-size: 1.2em; }
+h4 { font-size: 1em; }
+h5, h6 { font-size: 0.9em; color: var(--muted); }
+#content > :first-child { margin-top: 0; }
+
+p, ul, ol, blockquote, pre, table { margin: 0 0 0.9em; }
+ul, ol { padding-left: 1.8em; }
+li + li { margin-top: 0.2em; }
+
+a { color: var(--link); text-decoration: none; }
+
+blockquote {
+  margin-left: 0;
+  padding: 0 1em;
+  color: var(--muted);
+  border-left: 0.25em solid var(--border);
+}
+
+code, pre {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: var(--code-size);
+}
+:not(pre) > code {
+  padding: 0.15em 0.35em;
+  background: var(--code-background);
+  border-radius: 4px;
+}
+pre {
+  padding: 0.9em 1em;
+  background: var(--code-background);
+  border-radius: 6px;
+  white-space: pre-wrap;
+}
+pre code.hljs { padding: 0; background: none; }
+
+table { border-collapse: collapse; }
+th, td { padding: 0.35em 0.8em; border: 1px solid var(--border); }
+th { background: var(--code-background); }
+
+img { max-width: 100%; }
+
+hr { height: 0; border: 0; border-top: 1px solid var(--border); margin: 1.5em 0; }
+
+pre, table, img, blockquote, figure, svg { break-inside: avoid; }
+
+.task-list-item { list-style: none; margin-left: -1.4em; }
+.task-box {
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  margin-right: 0.45em;
+  vertical-align: -0.1em;
+  border: 1px solid var(--muted);
+  border-radius: 3px;
+  text-align: center;
+  line-height: 0.85em;
+  font-size: 0.9em;
+}
+.task-box.checked::after { content: "✓"; }
+
+.callout {
+  padding: 0.6em 1em;
+  color: var(--text);
+  background: var(--callout-background);
+  border-left: 0.25em solid var(--callout-accent);
+  border-radius: 4px;
+}
+.callout > :last-child { margin-bottom: 0; }
+.callout p:empty { display: none; }
+.callout-title { margin-bottom: 0.4em; font-weight: 600; color: var(--callout-accent); }
+.callout { --callout-accent: #0969da; --callout-background: #ddf4ff; }
+.callout-tip, .callout-success, .callout-check, .callout-done {
+  --callout-accent: #1a7f37; --callout-background: #dafbe1;
+}
+.callout-important, .callout-example, .callout-abstract, .callout-summary {
+  --callout-accent: #8250df; --callout-background: #fbefff;
+}
+.callout-warning, .callout-caution, .callout-attention, .callout-question, .callout-help {
+  --callout-accent: #9a6700; --callout-background: #fff8c5;
+}
+.callout-danger, .callout-error, .callout-failure, .callout-fail, .callout-bug {
+  --callout-accent: #cf222e; --callout-background: #ffebe9;
+}
+.callout-quote, .callout-cite { --callout-accent: var(--muted); --callout-background: var(--code-background); }
+
+.wikilink { color: var(--link); }
+.wikilink.embed { font-style: italic; }
+
+.footnotes { font-size: 0.9em; color: var(--muted); }
+.footnotes-sep { margin-top: 2em; }
+
+.math-display { margin: 0 0 0.9em; text-align: center; break-inside: avoid; }
+pre.mermaid { background: none; text-align: center; white-space: normal; }
