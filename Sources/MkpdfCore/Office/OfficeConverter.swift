@@ -14,6 +14,8 @@ import AppKit
 @MainActor
 public struct OfficeConverter: DocumentConverter {
     private static let readyTimeout: Duration = .seconds(60)
+    /// The next run must not find the app still shutting down and take it for running.
+    private static let quitTimeout: Duration = .seconds(30)
     private static let openTimeout: Duration = .seconds(30)
     private static let pollInterval: Duration = .milliseconds(500)
     /// An `open` sent while the app is still starting can be dropped; it is sent again.
@@ -66,6 +68,9 @@ public struct OfficeConverter: DocumentConverter {
         if !wasRunning {
             // The PDFs are written; failing to quit leaves the app open, nothing more.
             _ = try? AppleScriptRunner.run(tell("quit saving no"))
+            _ = try? await poll(timeout: Self.quitTimeout, failure: "did not quit") {
+                !isRunning
+            }
         }
         return errors
     }
@@ -80,7 +85,13 @@ public struct OfficeConverter: DocumentConverter {
                 try await open(source)
             }
             let document = "\(app.documentClass) target"
-            let close = keepOpen ? "" : "close \(document) saving no"
+            // By path, not by index: the index follows window order, which can change between
+            // the lookup and the close.
+            let close =
+                keepOpen
+                ? ""
+                : "close (every \(app.documentClass) whose \(app.pathProperty) is "
+                    + "\(AppleScriptRunner.literal(source))) saving no"
             try AppleScriptRunner.run(
                 """
                 with timeout of \(Self.saveTimeoutSeconds) seconds
