@@ -4,8 +4,12 @@ import AppKit
 ///
 /// The app is launched once per batch and quit at the end only if it was not running
 /// before. Documents the user already had open are exported but left open; documents
-/// mkpdf opened are closed without saving. Office is sandboxed: it can write next to the
-/// source only once the user granted it the folder (Office asks the first time).
+/// mkpdf opened are closed without saving.
+///
+/// Office is sandboxed and asks the user for every folder it writes to, so it saves into
+/// the Office group container, which all Office apps may write to, and mkpdf moves the PDF
+/// next to the source. Reading that container needs the "access data from other apps"
+/// permission for the app running mkpdf; macOS asks once.
 @MainActor
 public struct OfficeConverter: DocumentConverter {
     private static let readyTimeout: Duration = .seconds(60)
@@ -13,9 +17,10 @@ public struct OfficeConverter: DocumentConverter {
     private static let pollInterval: Duration = .milliseconds(500)
     /// An `open` sent while the app is still starting can be dropped; it is sent again.
     private static let reopenInterval: Duration = .seconds(5)
-    /// Long enough for a big presentation, or for the user to answer Office's
-    /// file access dialog.
+    /// Long enough for a big presentation.
     private static let saveTimeoutSeconds = 600
+    /// Shared by all Office apps (team UBF8T346G9), so their sandbox lets them write here.
+    private static let officeGroupContainer = "Library/Group Containers/UBF8T346G9.Office"
 
     private let app: OfficeApp
 
@@ -30,6 +35,20 @@ public struct OfficeConverter: DocumentConverter {
         else {
             return jobs.map { _ in .office("\(app.displayName) is not installed") }
         }
+        let exchange = FileManager.default.homeDirectoryForCurrentUser
+            .appending(path: Self.officeGroupContainer)
+            .appending(path: "mkpdf/\(UUID().uuidString)", directoryHint: .isDirectory)
+        do {
+            try FileManager.default.createDirectory(
+                at: exchange, withIntermediateDirectories: true)
+        } catch {
+            let reason = describeContainerAccess(error)
+            return jobs.map { _ in .office(reason) }
+        }
+        defer {
+            // Office's container is not the user's folder; a leftover there is harmless.
+            try? FileManager.default.removeItem(at: exchange)
+        }
         let wasRunning = isRunning
         let alreadyOpen: Set<String>
         do {
@@ -43,7 +62,9 @@ public struct OfficeConverter: DocumentConverter {
         }
         var errors: [ConversionError?] = []
         for job in jobs {
-            errors.append(await export(job, keepOpen: alreadyOpen.contains(path(of: job.source))))
+            errors.append(
+                await export(
+                    job, via: exchange, keepOpen: alreadyOpen.contains(path(of: job.source))))
         }
         if !wasRunning {
             // The PDFs are written; failing to quit leaves the app open, nothing more.
@@ -52,8 +73,11 @@ public struct OfficeConverter: DocumentConverter {
         return errors
     }
 
-    private func export(_ job: ConversionJob, keepOpen: Bool) async -> ConversionError? {
+    private func export(
+        _ job: ConversionJob, via exchange: URL, keepOpen: Bool
+    ) async -> ConversionError? {
         let source = path(of: job.source)
+        let saved = exchange.appending(path: "\(UUID().uuidString).pdf")
         do {
             if !keepOpen {
                 try await open(source)
@@ -70,7 +94,7 @@ public struct OfficeConverter: DocumentConverter {
                         if \(app.pathProperty) of \(app.documentClass) i is \
                     \(AppleScriptRunner.literal(source)) then set target to i
                     end repeat
-                    \(app.savePDF(document: document, to: AppleScriptRunner.literal(path(of: job.output))))
+                    \(app.savePDF(document: document, to: AppleScriptRunner.literal(path(of: saved))))
                     \(close)
                     """))
                 end timeout
@@ -78,8 +102,13 @@ public struct OfficeConverter: DocumentConverter {
         } catch {
             return .office(describe(error))
         }
-        guard FileManager.default.fileExists(atPath: path(of: job.output)) else {
+        guard FileManager.default.fileExists(atPath: path(of: saved)) else {
             return .office("\(app.displayName) finished without writing the PDF")
+        }
+        do {
+            try FileManager.default.moveItem(at: saved, to: job.output)
+        } catch {
+            return .office(describeContainerAccess(error))
         }
         return nil
     }
@@ -161,6 +190,16 @@ public struct OfficeConverter: DocumentConverter {
         url.path(percentEncoded: false)
     }
 
+    private func describeContainerAccess(_ error: any Error) -> String {
+        guard let error = error as? CocoaError,
+            [.fileReadNoPermission, .fileWriteNoPermission].contains(error.code)
+        else {
+            return error.localizedDescription
+        }
+        return "no access to Office's shared folder: allow \"access data from other apps\" "
+            + "for the app running mkpdf in System Settings → Privacy & Security"
+    }
+
     private func describe(_ error: any Error) -> String {
         guard let failure = error as? AppleScriptRunner.Failure else {
             return error.localizedDescription
@@ -170,10 +209,10 @@ public struct OfficeConverter: DocumentConverter {
             return "not allowed to control \(app.displayName): allow it in System Settings → "
                 + "Privacy & Security → Automation"
         case AppleScriptRunner.Code.userCanceled:
-            return "\(app.displayName) was not given access to the folder"
+            return "\(app.displayName): canceled"
         case AppleScriptRunner.Code.timedOut:
-            return "\(app.displayName) did not respond in time; it may be waiting in a dialog "
-                + "(a password or file access)"
+            return "\(app.displayName) did not respond in time; it may be waiting in a dialog, "
+                + "for example for a password"
         default:
             return "\(app.displayName): \(failure.message)"
         }

@@ -71,10 +71,8 @@ public struct Batch {
         }
     }
 
-    /// A hidden file next to the source: installing is then an atomic rename, and Office,
-    /// once granted the folder, can write there.
+    /// A hidden file next to the source, so installing is an atomic rename.
     private static func scratchOutput(for source: URL) -> URL {
-        // Office appends ".pdf" to a name without it, so the extension stays last.
         let stem = source.deletingPathExtension().lastPathComponent
         return source.deletingLastPathComponent().appending(
             path: ".\(stem).\(UUID().uuidString).pdf")
