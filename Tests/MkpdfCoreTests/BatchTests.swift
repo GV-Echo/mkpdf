@@ -88,6 +88,20 @@ private struct CopyingConverter: DocumentConverter {
         #expect((try? reports[1].outcome.get()) != nil)
     }
 
+    @Test func readOnlyFolderIsReportedAsSuch() async throws {
+        let folder = directory.appending(path: "Только чтение", directoryHint: .isDirectory)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let source = folder.appending(path: "note.txt")
+        try "source".write(to: source, atomically: true, encoding: .utf8)
+        try FileManager.default.setAttributes([.posixPermissions: 0o555], ofItemAtPath: folder.path)
+        defer {
+            try? FileManager.default.setAttributes(
+                [.posixPermissions: 0o755], ofItemAtPath: folder.path)
+        }
+        let reports = await batch.run([source])
+        #expect(failure(of: reports[0]) == "cannot write to the folder \"Только чтение\"")
+    }
+
     private func failure(of report: FileReport) -> String {
         guard case .failure(let error) = report.outcome else { return "success" }
         return error.description

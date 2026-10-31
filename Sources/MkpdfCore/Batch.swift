@@ -40,6 +40,15 @@ public struct Batch {
                     source: source, outcome: .failure(.unsupportedType(fileExtension)))
                 continue
             }
+            let folder = source.deletingLastPathComponent()
+            // Checked up front: WebKit and Office report a read-only folder only as a vague
+            // printing or saving failure.
+            guard FileManager.default.isWritableFile(atPath: folder.path(percentEncoded: false))
+            else {
+                reports[source] = FileReport(
+                    source: source, outcome: .failure(.readOnlyFolder(folder.lastPathComponent)))
+                continue
+            }
             guard destinations.insert(destination).inserted else {
                 reports[source] = FileReport(
                     source: source,

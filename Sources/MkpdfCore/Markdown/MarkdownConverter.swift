@@ -17,11 +17,14 @@ public struct MarkdownConverter: DocumentConverter {
     }
 
     private func convert(_ job: ConversionJob) async -> ConversionError? {
-        let source: String
+        let bytes: Data
         do {
-            source = try String(contentsOf: job.source, encoding: .utf8)
+            bytes = try Data(contentsOf: job.source)
         } catch {
             return .fileSystem(error.localizedDescription)
+        }
+        guard let source = String(data: bytes, encoding: .utf8) else {
+            return .notUTF8
         }
         let resolver = ResourceResolver(document: job.source)
         let renderer = PrintRenderer(schemeHandler: LocalSchemeHandler(resolver: resolver))

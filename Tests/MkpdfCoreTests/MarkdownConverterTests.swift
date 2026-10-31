@@ -48,6 +48,17 @@ import Testing
         }
     }
 
+    @Test func nonUTF8FileIsReportedAsSuch() async throws {
+        let source = directory.appending(path: "cp1251.md")
+        try #require("# Заголовок".data(using: .windowsCP1251)).write(to: source)
+        let report = try #require(await batch.run([source]).first)
+        guard case .failure(let error) = report.outcome else {
+            Issue.record("converted a non-UTF-8 file")
+            return
+        }
+        #expect(error.description == "the file is not UTF-8 text")
+    }
+
     @Test func basicMarkdownIsRenderedNotPrintedRaw() async throws {
         let pdf = try await convertFixture("basic.md")
         #expect(pdf.text.contains("Bold text and inline code"))

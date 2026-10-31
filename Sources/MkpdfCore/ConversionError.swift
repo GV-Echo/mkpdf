@@ -6,6 +6,8 @@ public enum ConversionError: Error, CustomStringConvertible, Sendable {
     case rendering(String)
     case office(String)
     case sameOutput(String)
+    case readOnlyFolder(String)
+    case notUTF8
 
     public var description: String {
         switch self {
@@ -21,6 +23,10 @@ public enum ConversionError: Error, CustomStringConvertible, Sendable {
             reason
         case .sameOutput(let pdfName):
             "another selected file also becomes \"\(pdfName)\""
+        case .readOnlyFolder(let folderName):
+            "cannot write to the folder \"\(folderName)\""
+        case .notUTF8:
+            "the file is not UTF-8 text"
         }
     }
 }
