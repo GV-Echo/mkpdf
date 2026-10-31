@@ -3,6 +3,8 @@
 Right-click files in Finder → Quick Actions → «В PDF». A PDF appears next to each file, with
 the same name. Several files can be selected at once.
 
+Инструкция на русском: [ниже](#инструкция-на-русском).
+
 | Format | How |
 |---|---|
 | `.md` | Built in, offline: tables, task lists, footnotes, code highlighting, Obsidian and GitHub callouts, `[[wiki links]]`, local images and `![[image]]`, KaTeX math, Mermaid diagrams; frontmatter is hidden. A4 pages. |
@@ -81,6 +83,56 @@ are still converted.
 
 Run `Scripts/install.sh` again. A new build is a new program for macOS, so it may ask once
 more to control Word and PowerPoint.
+
+## Инструкция на русском
+
+**Что нужно:** macOS 15 или новее, инструменты разработчика Xcode (`xcode-select --install`).
+Word и PowerPoint нужны только для docx и pptx.
+
+**1. Установить программу.** В Терминале, в папке проекта:
+
+```bash
+Scripts/install.sh
+```
+
+**2. Добавить быстрое действие:**
+
+```bash
+Scripts/install-shortcut.sh
+```
+
+Откроются «Команды» с карточкой «В PDF». Нажмите **«Добавить»**. Если спросит про
+существующую «В PDF», нажмите **«Заменить»**.
+
+**3. Разрешить скрипты.** Приложение «Команды» → меню **«Команды» → «Настройки…» → вкладка
+«Дополнительно»** → включить **«Разрешить запуск скриптов»**. Если там есть кнопка
+**«Открыть Системные настройки»**, нажмите её и разрешите в открывшемся окне.
+
+**4. Включить действие в Finder.** ПКМ на любом файле → **«Быстрые действия» →
+«Настроить…»** → поставить галочку **«В PDF»**.
+
+**5. Первый запуск.** Выделите файлы `.md`, `.docx`, `.pptx` → ПКМ → **«Быстрые действия» →
+«В PDF»**. Один раз появятся вопросы:
+
+- «Разрешить быстрой команде «В PDF» использовать … в скрипте оболочки?» →
+  **«Разрешать всегда»**.
+- «“mkpdf” хочет управлять «Microsoft Word»», и то же для PowerPoint → **«Разрешить»**.
+- Word: «Предоставить доступ к файлам» для папки
+  `…/Library/Application Support/mkpdf/Office` → **«Выбрать…»**. Папка уже выбрана, никуда
+  не переходите, сразу **«Предоставить доступ»**.
+- То же в PowerPoint.
+
+**6. Дальше** вопросов нет: ПКМ → «Быстрые действия» → «В PDF», и PDF появляется рядом с
+файлом под тем же именем.
+
+**Если что-то не так:**
+
+- Ошибка приходит уведомлением с именем файла и причиной; остальные файлы всё равно
+  конвертируются. Значения сообщений — в таблице [Errors](#errors).
+- Если отказали в управлении Office: **Системные настройки → Конфиденциальность и
+  безопасность → Автоматизация → mkpdf** → включить Microsoft Word и PowerPoint.
+- Обновление: снова `Scripts/install.sh`. macOS может один раз переспросить про управление
+  Word и PowerPoint.
 
 ## Development
 
