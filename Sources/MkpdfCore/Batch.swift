@@ -31,14 +31,22 @@ public struct Batch {
     public func run(_ sources: [URL]) async -> [FileReport] {
         var reports: [URL: FileReport] = [:]
         var groups: [String: (converter: DocumentConverter, sources: [URL])] = [:]
+        var destinations: Set<URL> = []
         for source in sources {
             let fileExtension = source.pathExtension.lowercased()
-            if let converter = convertersByExtension[fileExtension] {
-                groups[fileExtension, default: (converter, [])].sources.append(source)
-            } else {
+            let destination = Self.destination(for: source)
+            guard let converter = convertersByExtension[fileExtension] else {
                 reports[source] = FileReport(
                     source: source, outcome: .failure(.unsupportedType(fileExtension)))
+                continue
             }
+            guard destinations.insert(destination).inserted else {
+                reports[source] = FileReport(
+                    source: source,
+                    outcome: .failure(.sameOutput(destination.lastPathComponent)))
+                continue
+            }
+            groups[fileExtension, default: (converter, [])].sources.append(source)
         }
         for (_, group) in groups.sorted(by: { $0.key < $1.key }) {
             for report in await convert(group.sources, with: group.converter) {

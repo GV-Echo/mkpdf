@@ -5,6 +5,7 @@ public enum ConversionError: Error, CustomStringConvertible, Sendable {
     case fileSystem(String)
     case rendering(String)
     case office(String)
+    case sameOutput(String)
 
     public var description: String {
         switch self {
@@ -18,6 +19,8 @@ public enum ConversionError: Error, CustomStringConvertible, Sendable {
             "rendering failed: \(reason)"
         case .office(let reason):
             reason
+        case .sameOutput(let pdfName):
+            "another selected file also becomes \"\(pdfName)\""
         }
     }
 }

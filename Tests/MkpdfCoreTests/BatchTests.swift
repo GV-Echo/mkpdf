@@ -68,6 +68,26 @@ private struct CopyingConverter: DocumentConverter {
                 atPath: directory.appending(path: "b-fail.pdf").path(percentEncoded: false)))
     }
 
+    @Test func secondFileWithTheSamePDFNameFailsInsteadOfOverwriting() async throws {
+        let batch = Batch(convertersByExtension: [
+            "txt": CopyingConverter(), "text": CopyingConverter(),
+        ])
+        let first = try makeFile("Отчёт.txt", contents: "first")
+        let second = try makeFile("Отчёт.text", contents: "second")
+        let reports = await batch.run([first, second])
+        #expect((try? reports[0].outcome.get()) != nil)
+        #expect(failure(of: reports[1]) == "another selected file also becomes \"Отчёт.pdf\"")
+        let pdf = directory.appending(path: "Отчёт.pdf")
+        #expect(try String(contentsOf: pdf, encoding: .utf8) == "first")
+    }
+
+    @Test func unsupportedFileDoesNotTakeThePDFName() async throws {
+        let unsupported = try makeFile("Отчёт.unknown")
+        let supported = try makeFile("Отчёт.txt")
+        let reports = await batch.run([unsupported, supported])
+        #expect((try? reports[1].outcome.get()) != nil)
+    }
+
     private func failure(of report: FileReport) -> String {
         guard case .failure(let error) = report.outcome else { return "success" }
         return error.description
