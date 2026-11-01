@@ -16,34 +16,27 @@ starts it in the background and quits it afterwards; documents you have open sta
 
 ## Install
 
-Needs macOS 15 or later and the Xcode 16 command line tools (`xcode-select --install`).
-macOS menus below are quoted in Russian, as they appear on a Russian system, with English in
-brackets.
+Needs macOS 15 or later. macOS menus below are quoted in Russian, as they appear on a Russian
+system, with English in brackets.
 
-1. Get the code and build it. This installs the program to `~/.local/bin/mkpdf`:
-
-   ```bash
-   git clone <repository URL> mkpdf
-   cd mkpdf
-   Scripts/install.sh
-   ```
-
-2. Add the Quick Action:
+1. In Terminal, run:
 
    ```bash
-   Scripts/install-shortcut.sh
+   curl -fsSL https://raw.githubusercontent.com/GV-Echo/mkpdf/main/install.sh | zsh
    ```
 
-   The «Команды» (Shortcuts) app opens a card «В PDF». Click «Добавить» (Add Shortcut).
-   If it asks about an existing «В PDF», click «Заменить» (Replace).
+   This puts the program in `~/.local/bin/mkpdf` and opens the «Быстрые команды»
+   (Shortcuts) app with a card «В PDF». Click «Добавить» (Add Shortcut). If it asks about an
+   existing one, click «Заменить» (Replace).
 
-3. Allow shortcuts to run scripts: in the «Команды» (Shortcuts) app, open the menu
-   «Команды» → «Настройки…» (Settings…) → tab «Дополнительно» (Advanced) → turn on
-   «Разрешить запуск скриптов» (Allow Running Scripts). If a button «Открыть Системные
-   настройки» (Open System Settings) is shown there, click it and allow it in the window
-   that opens.
+   For an English name, add `-s -- --english` at the end: the action is then called
+   «To PDF» instead of «В PDF» everywhere below.
 
-4. Show the action in Finder: right-click any file → «Быстрые действия» (Quick Actions) →
+2. Allow shortcuts to run scripts: in the «Быстрые команды» (Shortcuts) app, open the menu
+   «Быстрые команды» (top left) → «Настройки…» (Settings…) → tab «Дополнительно» (Advanced)
+   → turn on «Запуск скриптов» (Allow Running Scripts).
+
+3. Show the action in Finder: right-click any file → «Быстрые действия» (Quick Actions) →
    «Настроить…» (Customize…) → tick «В PDF».
 
 ## First run
@@ -54,6 +47,7 @@ Actions) → «В PDF». The first time, macOS and Office ask a few questions, o
 | Question | Answer |
 |---|---|
 | «Разрешить быстрой команде «В PDF» использовать … в скрипте оболочки?» (Allow «В PDF» to share … with a shell script?) | «Разрешать всегда» (Always Allow) |
+| «Приложение «mkpdf» запрашивает доступ к файлам на Вашем Рабочем столе» (wants to access files on your Desktop); the same for «Документы» (Documents), «Загрузки» (Downloads) when files are there | «Разрешить» (Allow) |
 | «“mkpdf” хочет управлять «Microsoft Word»» (wants to control Microsoft Word), and the same for PowerPoint | «Разрешить» (Allow) |
 | Word: «Предоставить доступ к файлам» (Grant File Access) for the folder `…/Library/Application Support/mkpdf/Office` | «Выбрать…» (Select…). The folder is already chosen: do not go anywhere else, just click «Предоставить доступ» (Grant Access) |
 | The same in PowerPoint | The same |
@@ -81,48 +75,62 @@ are still converted.
 
 ## Update
 
-Run `Scripts/install.sh` again. A new build is a new program for macOS, so it may ask once
-more to control Word and PowerPoint.
+Run the install command again and click «Заменить» (Replace) on the card. A new build is a
+new program for macOS, so it may ask once more for the questions above.
+
+## Uninstall
+
+1. In Terminal:
+
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/GV-Echo/mkpdf/main/install.sh | zsh -s -- --uninstall
+   ```
+
+   This removes the program and the Office exchange folder.
+
+2. Delete the shortcut: in the «Быстрые команды» (Shortcuts) app, right-click «В PDF» →
+   «Удалить» (Delete).
+
+The Automation switches for mkpdf stay in «Системные настройки» (System Settings) →
+«Конфиденциальность и безопасность» (Privacy & Security) → «Автоматизация» (Automation);
+macOS keeps them and they do nothing without the program.
 
 ## Инструкция на русском
 
-**Что нужно:** macOS 15 или новее, инструменты разработчика Xcode (`xcode-select --install`).
-Word и PowerPoint нужны только для docx и pptx.
+**Что нужно:** macOS 15 или новее. Word и PowerPoint нужны только для docx и pptx.
 
-**1. Установить программу.** В Терминале, в папке проекта:
-
-```bash
-Scripts/install.sh
-```
-
-**2. Добавить быстрое действие:**
+**1. Установить.** В Терминале:
 
 ```bash
-Scripts/install-shortcut.sh
+curl -fsSL https://raw.githubusercontent.com/GV-Echo/mkpdf/main/install.sh | zsh
 ```
 
-Откроются «Команды» с карточкой «В PDF». Нажмите **«Добавить»**. Если спросит про
-существующую «В PDF», нажмите **«Заменить»**.
+Откроются «Быстрые команды» с карточкой «В PDF». Нажмите **«Добавить»**. Если спросит про
+существующую, нажмите **«Заменить»**.
 
-**3. Разрешить скрипты.** Приложение «Команды» → меню **«Команды» → «Настройки…» → вкладка
-«Дополнительно»** → включить **«Разрешить запуск скриптов»**. Если там есть кнопка
-**«Открыть Системные настройки»**, нажмите её и разрешите в открывшемся окне.
+Английское название: добавьте в конец команды `-s -- --english`. Тогда действие называется
+«To PDF», и во всех шагах ниже вместо «В PDF» будет «To PDF».
 
-**4. Включить действие в Finder.** ПКМ на любом файле → **«Быстрые действия» →
+**2. Разрешить скрипты.** Приложение «Быстрые команды» → меню **«Быстрые команды»** слева
+сверху → **«Настройки…» → вкладка «Дополнительно»** → включить **«Запуск скриптов»**.
+
+**3. Включить действие в Finder.** ПКМ на любом файле → **«Быстрые действия» →
 «Настроить…»** → поставить галочку **«В PDF»**.
 
-**5. Первый запуск.** Выделите файлы `.md`, `.docx`, `.pptx` → ПКМ → **«Быстрые действия» →
+**4. Первый запуск.** Выделите файлы `.md`, `.docx`, `.pptx` → ПКМ → **«Быстрые действия» →
 «В PDF»**. Один раз появятся вопросы:
 
 - «Разрешить быстрой команде «В PDF» использовать … в скрипте оболочки?» →
   **«Разрешать всегда»**.
+- «Приложение «mkpdf» запрашивает доступ к файлам на Вашем Рабочем столе», и то же для
+  «Документов» и «Загрузок», если файлы там → **«Разрешить»**.
 - «“mkpdf” хочет управлять «Microsoft Word»», и то же для PowerPoint → **«Разрешить»**.
 - Word: «Предоставить доступ к файлам» для папки
   `…/Library/Application Support/mkpdf/Office` → **«Выбрать…»**. Папка уже выбрана, никуда
   не переходите, сразу **«Предоставить доступ»**.
 - То же в PowerPoint.
 
-**6. Дальше** вопросов нет: ПКМ → «Быстрые действия» → «В PDF», и PDF появляется рядом с
+**5. Дальше** вопросов нет: ПКМ → «Быстрые действия» → «В PDF», и PDF появляется рядом с
 файлом под тем же именем.
 
 **Если что-то не так:**
@@ -131,8 +139,21 @@ Scripts/install-shortcut.sh
   конвертируются. Значения сообщений — в таблице [Errors](#errors).
 - Если отказали в управлении Office: **Системные настройки → Конфиденциальность и
   безопасность → Автоматизация → mkpdf** → включить Microsoft Word и PowerPoint.
-- Обновление: снова `Scripts/install.sh`. macOS может один раз переспросить про управление
-  Word и PowerPoint.
+- Обновление: снова команда установки, на карточке **«Заменить»**. macOS может один раз
+  переспросить разрешения из шага 4.
+
+**Удаление:**
+
+1. В Терминале:
+
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/GV-Echo/mkpdf/main/install.sh | zsh -s -- --uninstall
+   ```
+
+   Удаляет программу и папку обмена Office.
+2. В «Быстрых командах» ПКМ на «В PDF» → **«Удалить»**.
+
+Переключатели mkpdf в «Автоматизации» macOS оставляет; без программы они ничего не делают.
 
 ## Development
 
@@ -144,5 +165,10 @@ Scripts/install-shortcut.sh
   plugin. Third-party libraries are in `Assets/vendor` with their licenses; refresh them from
   the versions pinned in `Scripts/vendor/package-lock.json` with `Scripts/update-vendor.sh`
   (needs npm).
-- The Quick Action is `Shortcut/to-pdf.plist`, signed and opened by
-  `Scripts/install-shortcut.sh`.
+- Install from source (needs the Xcode 16 command line tools): `Scripts/install.sh` builds and
+  installs the program, `Scripts/install-shortcut.sh [--english]` signs
+  `Shortcut/to-pdf.plist` and opens it for import.
+- Release: `Scripts/release.sh` puts a universal ad-hoc signed `mkpdf` and the signed
+  `to-pdf.shortcut` into `dist/`; upload both to a GitHub release. `install.sh` downloads them
+  from the latest release with curl, which does not quarantine them, so Gatekeeper lets the
+  program run.

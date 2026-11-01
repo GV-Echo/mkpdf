@@ -1,12 +1,18 @@
 #!/bin/zsh
-# Signs Shortcut/to-pdf.plist and opens it, so Shortcuts offers to add the "В PDF" Quick Action.
+# Signs the shortcut and opens it, so Shortcuts offers to add the Quick Action:
+# "В PDF", or "To PDF" with --english.
 set -euo pipefail
 
-root=${0:A:h:h}
-work=$(mktemp -d)
+name="В PDF"
+case ${1-} in
+    "") ;;
+    --english) name="To PDF" ;;
+    *)
+        echo "usage: ${0:t} [--english]" >&2
+        exit 64
+        ;;
+esac
 
-plutil -convert binary1 -o "$work/unsigned.shortcut" "$root/Shortcut/to-pdf.plist"
-# The tool logs unrelated runtime warnings to stderr; failures still stop the script.
-shortcuts sign --mode anyone --input "$work/unsigned.shortcut" --output "$work/В PDF.shortcut" \
-    2>/dev/null
-open "$work/В PDF.shortcut"
+work=$(mktemp -d)
+"${0:A:h}/sign-shortcut.sh" "$work/$name.shortcut"
+open "$work/$name.shortcut"
