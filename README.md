@@ -3,7 +3,7 @@
 Right-click files in Finder → Quick Actions → To PDF. A PDF appears next to each file, with
 the same name. Several files can be selected at once.
 
-Russian guide: [Инструкция на русском](#инструкция-на-русском).
+### [Инструкция на русском →](#инструкция-на-русском)
 
 | Format | How |
 |---|---|
