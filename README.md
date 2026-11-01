@@ -1,9 +1,9 @@
 # mkpdf
 
-Right-click files in Finder → Quick Actions → «В PDF». A PDF appears next to each file, with
+Right-click files in Finder → Quick Actions → To PDF. A PDF appears next to each file, with
 the same name. Several files can be selected at once.
 
-Инструкция на русском: [ниже](#инструкция-на-русском).
+Russian guide: [Инструкция на русском](#инструкция-на-русском).
 
 | Format | How |
 |---|---|
@@ -16,40 +16,36 @@ starts it in the background and quits it afterwards; documents you have open sta
 
 ## Install
 
-Needs macOS 15 or later. macOS menus below are quoted in Russian, as they appear on a Russian
-system, with English in brackets.
+Needs macOS 15 or later.
 
 1. In Terminal, run:
 
    ```bash
-   curl -fsSL https://raw.githubusercontent.com/GV-Echo/mkpdf/main/install.sh | zsh
+   curl -fsSL https://raw.githubusercontent.com/GV-Echo/mkpdf/main/install.sh | zsh -s -- --english
    ```
 
-   This puts the program in `~/.local/bin/mkpdf` and opens the «Быстрые команды»
-   (Shortcuts) app with a card «В PDF». Click «Добавить» (Add Shortcut). If it asks about an
-   existing one, click «Заменить» (Replace).
+   This puts the program in `~/.local/bin/mkpdf` and opens the Shortcuts app with a card
+   "To PDF". Click Add Shortcut. If it asks about an existing one, click Replace.
 
-   For an English name, add `-s -- --english` at the end: the action is then called
-   «To PDF» instead of «В PDF» everywhere below.
+   Without `-s -- --english` the action gets its Russian name, "В PDF".
 
-2. Allow shortcuts to run scripts: in the «Быстрые команды» (Shortcuts) app, open the menu
-   «Быстрые команды» (top left) → «Настройки…» (Settings…) → tab «Дополнительно» (Advanced)
-   → turn on «Запуск скриптов» (Allow Running Scripts).
+2. Allow shortcuts to run scripts: in the Shortcuts app, open the menu Shortcuts →
+   Settings… → Advanced → turn on Allow Running Scripts.
 
-3. Show the action in Finder: right-click any file → «Быстрые действия» (Quick Actions) →
-   «Настроить…» (Customize…) → tick «В PDF».
+3. Show the action in Finder: right-click any file → Quick Actions → Customize… → tick
+   To PDF.
 
 ## First run
 
-Select a `.md`, a `.docx` and a `.pptx` file, right-click → «Быстрые действия» (Quick
-Actions) → «В PDF». The first time, macOS and Office ask a few questions, once each:
+Select a `.md`, a `.docx` and a `.pptx` file, right-click → Quick Actions → To PDF. The
+first time, macOS and Office ask a few questions, once each:
 
 | Question | Answer |
 |---|---|
-| «Разрешить быстрой команде «В PDF» использовать … в скрипте оболочки?» (Allow «В PDF» to share … with a shell script?) | «Разрешать всегда» (Always Allow) |
-| «Приложение «mkpdf» запрашивает доступ к файлам на Вашем Рабочем столе» (wants to access files on your Desktop); the same for «Документы» (Documents), «Загрузки» (Downloads) when files are there | «Разрешить» (Allow) |
-| «“mkpdf” хочет управлять «Microsoft Word»» (wants to control Microsoft Word), and the same for PowerPoint | «Разрешить» (Allow) |
-| Word: «Предоставить доступ к файлам» (Grant File Access) for the folder `…/Library/Application Support/mkpdf/Office` | «Выбрать…» (Select…). The folder is already chosen: do not go anywhere else, just click «Предоставить доступ» (Grant Access) |
+| Shortcuts asks whether To PDF may share the selected files with the shell script | Always Allow |
+| macOS asks whether mkpdf may access files in your Desktop folder; the same for Documents and Downloads when the files are there | Allow |
+| macOS asks whether mkpdf may control Microsoft Word, and the same for PowerPoint | Allow |
+| Word asks to grant file access to the folder `…/Library/Application Support/mkpdf/Office` | Select…. The folder is already chosen: do not go anywhere else, just click Grant Access |
 | The same in PowerPoint | The same |
 
 After that, conversions run without questions.
@@ -69,14 +65,14 @@ are still converted.
 | `another selected file also becomes "X.pdf"` | Two selected files share a name (e.g. `X.md` and `X.docx`); the first one is converted. |
 | `cannot write to the folder "…"` | The folder is read-only. |
 | `the file is not UTF-8 text` | A Markdown file in another encoding (e.g. Windows-1251): save it as UTF-8. |
-| `not allowed to control Microsoft Word: …` | The control permission was denied: «Системные настройки» (System Settings) → «Конфиденциальность и безопасность» (Privacy & Security) → «Автоматизация» (Automation) → mkpdf → turn on Microsoft Word / PowerPoint. |
+| `not allowed to control Microsoft Word: …` | The control permission was denied: System Settings → Privacy & Security → Automation → mkpdf → turn on Microsoft Word / PowerPoint. |
 | `Microsoft Word was not given access to mkpdf's exchange folder; run again and grant it` | The Office question was cancelled: run again and grant it. |
 | `… did not respond in time; it may be waiting in a dialog` | Office shows a dialog, for example a password for a protected file. |
 
 ## Update
 
-Run the install command again and click «Заменить» (Replace) on the card. A new build is a
-new program for macOS, so it may ask once more for the questions above.
+Run the install command again and click Replace on the card. A new build is a new program
+for macOS, so it may ask once more for the questions above.
 
 ## Uninstall
 
@@ -88,12 +84,10 @@ new program for macOS, so it may ask once more for the questions above.
 
    This removes the program and the Office exchange folder.
 
-2. Delete the shortcut: in the «Быстрые команды» (Shortcuts) app, right-click «В PDF» →
-   «Удалить» (Delete).
+2. Delete the shortcut: in the Shortcuts app, right-click To PDF → Delete.
 
-The Automation switches for mkpdf stay in «Системные настройки» (System Settings) →
-«Конфиденциальность и безопасность» (Privacy & Security) → «Автоматизация» (Automation);
-macOS keeps them and they do nothing without the program.
+The Automation switches for mkpdf stay in System Settings → Privacy & Security →
+Automation; macOS keeps them and they do nothing without the program.
 
 ## Инструкция на русском
 
